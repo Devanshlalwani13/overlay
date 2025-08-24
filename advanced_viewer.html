@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced Synchronized & Overlay Image Viewer</title>
+    <script src="https://openseadragon.github.io/openseadragon/openseadragon.min.js"></script>
+    <style type="text/css">
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        #header {
+            padding: 10px;
+            background-color: #222;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        #header h1 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        #controls {
+            padding: 12px;
+            text-align: center;
+            background-color: #444;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-shrink: 0;
+            border-bottom: 1px solid #222;
+        }
+        .file-input-wrapper label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        #toggle-view {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid #777;
+            background-color: #555;
+            color: white;
+            font-weight: bold;
+        }
+        #toggle-view:disabled {
+            background-color: #3e3e3e;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .slider-container {
+            display: none; /* Hidden by default */
+            align-items: center;
+        }
+        .slider-container label {
+            margin-right: 10px;
+        }
+        #viewer-container {
+            display: flex;
+            flex-grow: 1;
+            width: 100%;
+        }
+        .openseadragon-viewer {
+            width: 50%;
+            height: 100%;
+            border: 1px solid #555;
+            background-color: #000;
+            position: relative;
+            transition: width 0.3s ease-in-out, visibility 0.3s;
+        }
+        .viewer-title {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 1em;
+            z-index: 10;
+        }
+        /* -- View Modes -- */
+        #viewer-container.overlay-mode #ihc-viewer {
+            width: 0;
+            border: none;
+            visibility: hidden;
+        }
+        #viewer-container.overlay-mode #he-viewer {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <h1>Simultaneous HE and IHC Viewer</h1>
+    </div>
+
+    <div id="controls">
+        <div class="file-input-wrapper">
+            <label for="he-file">HE Slide (Base):</label>
+            <input type="file" id="he-file" accept="image/*">
+        </div>
+        <div class="file-input-wrapper">
+            <label for="ihc-file">IHC Slide (Overlay):</label>
+            <input type="file" id="ihc-file" accept="image/*">
+        </div>
+        <button id="toggle-view" disabled>Switch to Overlay View</button>
+        <div class="slider-container" id="opacity-controls">
+            <label for="opacity-slider">Overlay Opacity:</label>
+            <input type="range" id="opacity-slider" min="0" max="1" value="0.5" step="0.01">
+        </div>
+    </div>
+
+    <div id="viewer-container">
+        <div id="he-viewer" class="openseadragon-viewer">
+             <div class="viewer-title">HE Viewer</div>
+        </div>
+        <div id="ihc-viewer" class="openseadragon-viewer">
+             <div class="viewer-title">IHC Viewer</div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // --- State Management ---
+        let isOverlayMode = false;
+        let heImageDataUrl = null;
+        let ihcImageDataUrl = null;
+        let ihcOverlayItem = null;
+
+        // --- DOM Elements ---
+        const toggleBtn = document.getElementById('toggle-view');
+        const opacityControls = document.getElementById('opacity-controls');
+        const opacitySlider = document.getElementById('opacity-slider');
+        const viewerContainer = document.getElementById('viewer-container');
+
+        // --- Initialize Viewers ---
+        const blankTile = { type: 'image', url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' };
+        const viewerOptions = {
+            prefixUrl: "https://openseadragon.github.io/openseadragon/images/",
+            showNavigator: true,
+            navigatorPosition: "BOTTOM_RIGHT",
+            tileSources: blankTile
+        };
+
+        const viewerHE = OpenSeadragon({ id: "he-viewer", ...viewerOptions });
+        const viewerIHC = OpenSeadragon({ id: "ihc-viewer", ...viewerOptions });
+
+        // --- Synchronization Logic ---
+        let isSyncing = false;
+        const syncViewers = (master, slave) => {
+            if (isSyncing || isOverlayMode) return;
+            isSyncing = true;
+            slave.viewport.zoomTo(master.viewport.getZoom(), null, true);
+            slave.viewport.panTo(master.viewport.getCenter(), true);
+            isSyncing = false;
+        };
+
+        viewerHE.addHandler('pan', () => syncViewers(viewerHE, viewerIHC));
+        viewerHE.addHandler('zoom', () => syncViewers(viewerHE, viewerIHC));
+        viewerIHC.addHandler('pan', () => syncViewers(viewerIHC, viewerHE));
+        viewerIHC.addHandler('zoom', () => syncViewers(viewerIHC, viewerHE));
+
+        // --- File Loading Logic ---
+        const checkImagesLoaded = () => {
+            if (heImageDataUrl && ihcImageDataUrl) {
+                toggleBtn.disabled = false;
+            }
+        };
+
+        const setupFileLoader = (viewer, inputId, callback) => {
+            document.getElementById(inputId).addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageUrl = e.target.result;
+                    viewer.open({ type: 'image', url: imageUrl });
+                    callback(imageUrl);
+                    checkImagesLoaded();
+                };
+                reader.readAsDataURL(file);
+            });
+        };
+
+        setupFileLoader(viewerHE, 'he-file', (url) => { heImageDataUrl = url; });
+        setupFileLoader(viewerIHC, 'ihc-file', (url) => { ihcImageDataUrl = url; });
+
+        // --- View Toggling and Overlay Logic ---
+        const activateOverlay = () => {
+            viewerContainer.classList.add('overlay-mode');
+            opacityControls.style.display = 'flex';
+
+            // Add IHC image as an overlay.
+            // The x, y, and width parameters are CRITICAL for perfect alignment.
+            viewerHE.addTiledImage({
+                tileSource: { type: 'image', url: ihcImageDataUrl },
+                x: 0,
+                y: 0,
+                width: 1, // This forces the overlay to match the base image's dimensions
+                opacity: parseFloat(opacitySlider.value),
+                success: (event) => { ihcOverlayItem = event.item; }
+            });
+        };
+
+        const deactivateOverlay = () => {
+            viewerContainer.classList.remove('overlay-mode');
+            opacityControls.style.display = 'none';
+
+            if (ihcOverlayItem) {
+                viewerHE.world.removeItem(ihcOverlayItem);
+                ihcOverlayItem = null;
+            }
+            // IMPORTANT: Force the IHC viewer to sync with the HE viewer's
+            // current state immediately upon becoming visible again.
+            const currentCenter = viewerHE.viewport.getCenter();
+            const currentZoom = viewerHE.viewport.getZoom();
+            viewerIHC.viewport.panTo(currentCenter, true);
+            viewerIHC.viewport.zoomTo(currentZoom, true);
+        };
+
+        toggleBtn.addEventListener('click', () => {
+            isOverlayMode = !isOverlayMode;
+            if (isOverlayMode) {
+                toggleBtn.textContent = 'Switch to Side-by-Side View';
+                activateOverlay();
+            } else {
+                toggleBtn.textContent = 'Switch to Overlay View';
+                deactivateOverlay();
+            }
+        });
+
+        opacitySlider.addEventListener('input', (event) => {
+            if (ihcOverlayItem) {
+                ihcOverlayItem.setOpacity(parseFloat(event.target.value));
+            }
+        });
+
+    </script>
+
+</body>
+</html>
