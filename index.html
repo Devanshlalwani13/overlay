@@ -1,0 +1,2677 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRC Synoptic Reporting Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #e9ecef;
+            padding: 0 20px;
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            color: #495057;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            color: #667eea;
+        }
+
+        .nav-tab.active {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #667eea;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collapsible::before {
+            content: '▼';
+            display: inline-block;
+            margin-right: 10px;
+            transition: transform 0.3s;
+        }
+
+        .collapsible.collapsed::before {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            margin-top: 15px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group,
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item,
+        .radio-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover,
+        .radio-item:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .checkbox-item input,
+        .radio-item input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-item.selected,
+        .radio-item.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .dimension-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dimension-input input {
+            width: 80px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-add {
+            background: #28a745;
+            color: white;
+            font-size: 0.9em;
+            padding: 8px 16px;
+        }
+
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+            font-size: 0.9em;
+            padding: 8px 16px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 10px 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .dynamic-row {
+            background: white;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tumor-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .tree-view {
+            margin-left: 20px;
+        }
+
+        .tree-item {
+            margin: 5px 0;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .tree-item:hover {
+            background: #f0f0f0;
+        }
+
+        .tree-item.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .tree-toggle {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+        }
+
+        .margin-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .margin-status.involved {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .margin-status.free {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .margin-status.not-assessable {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .actions-bar {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            border-top: 2px solid #e9ecef;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85em;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #667eea;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        .help-text {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .epicentre-select {
+            border: 2px solid #667eea;
+            background: #f8f9ff;
+        }
+
+        .structure-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+        }
+
+        .structure-item.epicentre {
+            background: #667eea;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CRC Synoptic Reporting Platform</h1>
+            <p>Comprehensive Colorectal Cancer Pathology Reporting System</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab(event, 'specimen')">Specimen Received</button>
+            <button class="nav-tab" onclick="switchTab(event, 'gross')">Gross Findings</button>
+            <button class="nav-tab" onclick="switchTab(event, 'margins')">Margins</button>
+            <button class="nav-tab" onclick="switchTab(event, 'nodes')">Lymph Nodes</button>
+            <button class="nav-tab" onclick="switchTab(event, 'histology')">Histology</button>
+            <button class="nav-tab" onclick="switchTab(event, 'impression')">Impression</button>
+        </div>
+
+        <div class="content">
+            <!-- Specimen Received Tab -->
+            <div id="specimen-tab" class="tab-content active">
+                <div class="section">
+                    <h2 class="section-title">Primary Specimen</h2>
+                    
+                    <div class="form-group">
+                        <label>Specimen Type (Single Selection)</label>
+                        <select id="specimen-type" onchange="updateComprisingOptions()">
+                            <option value="">Select Specimen Type</option>
+                            <option value="intersphincteric">Intersphincteric resection</option>
+                            <option value="extra-levator">Extra-levator abdominoperineal excision</option>
+                            <option value="abdominoperineal">Abdominoperineal resection</option>
+                            <option value="anterior">Anterior Resection</option>
+                            <option value="low-anterior">Low anterior resection</option>
+                            <option value="ultra-low">Ultra-low anterior resection</option>
+                            <option value="total-procto">Total proctocolectomy</option>
+                            <option value="total-colectomy">Total colectomy</option>
+                            <option value="right-hemi">Right hemicolectomy</option>
+                            <option value="left-hemi">Left hemicolectomy</option>
+                            <option value="extended-right">Extended right hemicolectomy</option>
+                            <option value="extended-left">Extended left hemicolectomy</option>
+                            <option value="transverse">Transverse colectomy</option>
+                            <option value="sigmoid">Sigmoid colectomy</option>
+                            <option value="rectosigmoid">Rectosigmoidectomy</option>
+                            <option value="colectomy-nos">Colectomy, NOS</option>
+                            <option value="polypectomy">Polypectomy</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Comprising of (Multiple Selections)</label>
+                        <div id="comprising-options" class="checkbox-group">
+                            <!-- Dynamically populated based on specimen type -->
+                        </div>
+                    </div>
+
+                    <div id="dimension-fields" class="form-group">
+                        <!-- Dynamically generated dimension fields -->
+                    </div>
+
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea id="specimen-comments" placeholder="Enter any additional comments..."></textarea>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Nodal Dissection</h2>
+                    
+                    <div class="form-group">
+                        <label>Regional Nodes</label>
+                        <button class="btn btn-add" onclick="addRegionalNode()">+ Add Regional Node</button>
+                        <div id="regional-nodes-list" style="margin-top: 15px;">
+                            <!-- Dynamically added regional nodes -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Non-Regional Nodes</label>
+                        <button class="btn btn-add" onclick="addNonRegionalNode()">+ Add Non-Regional Node</button>
+                        <div id="non-regional-nodes-list" style="margin-top: 15px;">
+                            <!-- Dynamically added non-regional nodes -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Other Specimens</h2>
+                    <button class="btn btn-add" onclick="addOtherSpecimen()">+ Add Other Specimen</button>
+                    <div id="other-specimens-list" style="margin-top: 15px;">
+                        <!-- Dynamically added other specimens -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gross Findings Tab -->
+            <div id="gross-tab" class="tab-content">
+                <div class="section">
+                    <h2 class="section-title">Specimen Assessment</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Specimen Oriented</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="specimen-oriented" value="oriented">
+                                    Oriented
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="specimen-oriented" value="unoriented">
+                                    Unoriented
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Specimen Integrity</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="specimen-integrity" value="intact">
+                                    Intact
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="specimen-integrity" value="fragmented">
+                                    Fragmented
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Assessment of Total Mesorectal Excision</label>
+                        <select id="mesorectal-excision">
+                            <option value="">Select Assessment</option>
+                            <option value="complete">Complete</option>
+                            <option value="nearly-complete">Nearly Complete</option>
+                            <option value="incomplete">Incomplete</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tumor Identified</label>
+                            <select id="tumor-identified" onchange="updateTumorDetails()">
+                                <option value="">Select</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No definite tumor</option>
+                                <option value="uncertain">Uncertain</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Number of Tumors/Lesions</label>
+                            <select id="tumor-count" onchange="generateTumorForms()">
+                                <option value="">Select</option>
+                                <option value="single">Single</option>
+                                <option value="multiple">Multiple</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="tumor-number-field" style="display: none;">
+                            <label>Number of Tumors</label>
+                            <input type="number" id="tumor-number" min="2" value="2" onchange="generateTumorForms()">
+                        </div>
+
+                        <div class="form-group" id="tumor-focality-field" style="display: none;">
+                            <label>Focality</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="tumor-focality" value="unifocal">
+                                    Unifocal
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="tumor-focality" value="multifocal">
+                                    Multifocal
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tumor-details-container">
+                    <!-- Dynamically generated tumor forms -->
+                </div>
+
+                <div class="section">
+                    <div class="form-group">
+                        <label>Grossed By:</label>
+                        <input type="text" id="grossed-by" placeholder="Enter name">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Margins Tab -->
+            <div id="margins-tab" class="tab-content">
+                <div class="section">
+                    <h2 class="section-title">Gross Margins</h2>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="margins-not-assessable" onchange="toggleMarginsTable()">
+                            Margins not assessable
+                        </label>
+                    </div>
+
+                    <div id="margins-table-container">
+                        <button class="btn btn-add" onclick="addMargin()">+ Add Margin</button>
+                        <div class="table-container">
+                            <table id="margins-table">
+                                <thead>
+                                    <tr>
+                                        <th>Resection Margin</th>
+                                        <th>Involvement by Tumor/Lesion</th>
+                                        <th>Distance from Tumor (cm)</th>
+                                        <th>Sampling Method</th>
+                                        <th>Comments</th>
+                                        <th>Section No</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" placeholder="Margin" value="Proximal" readonly></td>
+                                        <td>
+                                            <select>
+                                                <option value="">Select</option>
+                                                <option value="involved">Involved</option>
+                                                <option value="free">Free</option>
+                                                <option value="not-assessable">Not Assessable</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="number" step="0.1" placeholder="Distance"></td>
+                                        <td>
+                                            <select>
+                                                <option value="">Select</option>
+                                                <option value="radial">Radial</option>
+                                                <option value="shaved">Shaved</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" placeholder="Comments"></td>
+                                        <td><input type="text" placeholder="Section"></td>
+                                        <td><button class="btn btn-remove" onclick="removeMargin(this)">Remove</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" placeholder="Margin" value="Distal" readonly></td>
+                                        <td>
+                                            <select>
+                                                <option value="">Select</option>
+                                                <option value="involved">Involved</option>
+                                                <option value="free">Free</option>
+                                                <option value="not-assessable">Not Assessable</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="number" step="0.1" placeholder="Distance"></td>
+                                        <td>
+                                            <select>
+                                                <option value="">Select</option>
+                                                <option value="radial">Radial</option>
+                                                <option value="shaved">Shaved</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" placeholder="Comments"></td>
+                                        <td><input type="text" placeholder="Section"></td>
+                                        <td><button class="btn btn-remove" onclick="removeMargin(this)">Remove</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" placeholder="Margin" value="Circumferential" readonly></td>
+                                        <td>
+                                            <select>
+                                                <option value="">Select</option>
+                                                <option value="involved">Involved</option>
+                                                <option value="free">Free</option>
+                                                <option value="not-assessable">Not Assessable</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="number" step="0.1" placeholder="Distance"></td>
+                                        <td>
+                                            <select>
+                                                <option value="">Select</option>
+                                                <option value="radial">Radial</option>
+                                                <option value="shaved">Shaved</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" placeholder="Comments"></td>
+                                        <td><input type="text" placeholder="Section"></td>
+                                        <td><button class="btn btn-remove" onclick="removeMargin(this)">Remove</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lymph Nodes Tab -->
+            <div id="nodes-tab" class="tab-content">
+                <div class="section">
+                    <h2 class="section-title">Regional Lymph Nodes</h2>
+                    <button class="btn btn-add" onclick="addRegionalLymphNodeSpecimen()">+ Add Regional Node Specimen</button>
+                    <div id="regional-lymph-nodes-container">
+                        <!-- Dynamically generated regional lymph node forms -->
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Non-Regional Lymph Nodes</h2>
+                    <button class="btn btn-add" onclick="addNonRegionalLymphNode()">+ Add Non-Regional Node</button>
+                    <div class="table-container">
+                        <table id="non-regional-nodes-table">
+                            <thead>
+                                <tr>
+                                    <th>Level of Node</th>
+                                    <th>No. of Nodes</th>
+                                    <th>Size of Largest Node (cm)</th>
+                                    <th>Gross Involvement</th>
+                                    <th>Extranodal Extension</th>
+                                    <th>Largest Dimension of Metastases (cm)</th>
+                                    <th>Soft Tissue Deposit</th>
+                                    <th>Comment</th>
+                                    <th>Section No</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamically added rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histology Tab -->
+            <div id="histology-tab" class="tab-content">
+                <div class="section">
+                    <h2 class="section-title">Primary Specimen Histology</h2>
+                    
+                    <div class="form-group">
+                        <label>Primary Specimen</label>
+                        <select id="histology-specimen-select">
+                            <!-- Populated from specimen received -->
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tumor Identified</label>
+                            <select id="histology-tumor-identified" onchange="updateHistologyFields()">
+                                <option value="">Select</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                                <option value="residual-viable">Residual viable tumor</option>
+                                <option value="no-residual">No residual viable tumor</option>
+                            </select>
+                            <p class="help-text">Options depend on pre-procedural therapy status</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Number of Histologies/Tumors</label>
+                            <select id="histology-count" onchange="generateHistologyForms()">
+                                <option value="">Select</option>
+                                <option value="single">Single Histology</option>
+                                <option value="multiple">Multiple Histologies</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="histology-number-field" style="display: none;">
+                            <label>Number of Different Histologies</label>
+                            <input type="number" id="histology-number" min="2" value="2" onchange="generateHistologyForms()">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tumor Morphology</label>
+                            <select id="histology-tumor-similarity">
+                                <option value="">Select</option>
+                                <option value="similar">All tumors show similar morphology</option>
+                                <option value="different">Tumors show different histology</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="non-neoplastic-description" style="display:none;">
+                        <label>Histological Description (for non-neoplastic conditions)</label>
+                        <textarea placeholder="Enter description"></textarea>
+                    </div>
+                </div>
+
+                <div id="histology-details-container">
+                    <!-- Dynamically generated histology forms -->
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Other Tumor Related Findings</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tumor Regression Grade</label>
+                            <select id="regression-grade">
+                                <option value="">Select</option>
+                                <option value="cannot-assess">Cannot assess</option>
+                                <option value="I">I</option>
+                                <option value="II">II</option>
+                                <option value="III">III</option>
+                                <option value="IV">IV</option>
+                                <option value="V">V</option>
+                            </select>
+                            <p class="help-text">Only applicable if pre-procedural therapy was given</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Necrosis</label>
+                            <select id="histology-necrosis">
+                                <option value="">Select</option>
+                                <option value="absent">Absent</option>
+                                <option value="present-focal">Present - Focal</option>
+                                <option value="present-extensive">Present - Extensive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tumor Infiltrating Lymphocytes (TILs)</label>
+                            <select id="tils-score">
+                                <option value="">Select</option>
+                                <option value="absent">Absent</option>
+                                <option value="low">Low (<10%)</option>
+                                <option value="moderate">Moderate (10-40%)</option>
+                                <option value="high">High (>40%)</option>
+                                <option value="cannot-assess">Cannot assess</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tumor Budding</label>
+                            <select id="tumor-budding">
+                                <option value="">Select</option>
+                                <option value="low">Low score (0-4)</option>
+                                <option value="intermediate">Intermediate score (5-9)</option>
+                                <option value="high">High score (10 or more)</option>
+                            </select>
+                            <p class="help-text">Measured in area of 0.785mm², 20x field</p>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Perineural Invasion</label>
+                            <select id="perineural-invasion" onchange="updateInvasionDetails('perineural')">
+                                <option value="">Select</option>
+                                <option value="absent">Absent</option>
+                                <option value="present-focal">Present - Focal</option>
+                                <option value="present-extensive">Present - Extensive</option>
+                            </select>
+                            <div id="perineural-details" style="display:none; margin-top:10px;">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" value="intratumoral">Intratumoral
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" value="extratumoral">Extratumoral
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Vascular Emboli</label>
+                            <select id="vascular-emboli" onchange="updateInvasionDetails('vascular')">
+                                <option value="">Select</option>
+                                <option value="absent">Absent</option>
+                                <option value="present-focal">Present - Focal</option>
+                                <option value="present-extensive">Present - Extensive</option>
+                            </select>
+                            <div id="vascular-details" style="display:none; margin-top:10px;">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" value="intratumoral">Intratumoral
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" value="extratumoral">Extratumoral
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" value="intramural">Intramural
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" value="extramural">Extramural
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Lymphatic Emboli</label>
+                            <select id="lymphatic-emboli" onchange="updateInvasionDetails('lymphatic')">
+                                <option value="">Select</option>
+                                <option value="absent">Absent</option>
+                                <option value="present-focal">Present - Focal</option>
+                                <option value="present-extensive">Present - Extensive</option>
+                            </select>
+                            <div id="lymphatic-details" style="display:none; margin-top:10px;">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" value="intratumoral">Intratumoral
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" value="extratumoral">Extratumoral
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" value="intramural">Intramural
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" value="extramural">Extramural
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Histological Findings</label>
+                        <textarea id="additional-histological-findings" placeholder="Enter any additional findings"></textarea>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Immunohistochemistry Results</h2>
+                    
+                    <h3>General Markers</h3>
+                    <button class="btn btn-add" onclick="addIHCMarker()">+ Add Marker</button>
+                    <div class="table-container" style="margin-top: 15px;">
+                        <table id="ihc-markers-table">
+                            <thead>
+                                <tr>
+                                    <th>Marker</th>
+                                    <th>Result</th>
+                                    <th>Proportion of Cells Stained</th>
+                                    <th>Intensity</th>
+                                    <th>Location</th>
+                                    <th>Comment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dynamically added markers -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Microsatellite Instability</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Marker</th>
+                                    <th>Nuclear Expression in Tumor Cells</th>
+                                    <th>Comment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>MSH2</td>
+                                    <td>
+                                        <select id="msi-msh2" onchange="updateMSIInterpretation()">
+                                            <option value="">Select</option>
+                                            <option value="lost">Lost</option>
+                                            <option value="retained">Retained</option>
+                                            <option value="uninterpretable">Uninterpretable</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" placeholder="Comment"></td>
+                                </tr>
+                                <tr>
+                                    <td>MSH6</td>
+                                    <td>
+                                        <select id="msi-msh6" onchange="updateMSIInterpretation()">
+                                            <option value="">Select</option>
+                                            <option value="lost">Lost</option>
+                                            <option value="retained">Retained</option>
+                                            <option value="uninterpretable">Uninterpretable</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" placeholder="Comment"></td>
+                                </tr>
+                                <tr>
+                                    <td>MLH1</td>
+                                    <td>
+                                        <select id="msi-mlh1" onchange="updateMSIInterpretation()">
+                                            <option value="">Select</option>
+                                            <option value="lost">Lost</option>
+                                            <option value="retained">Retained</option>
+                                            <option value="uninterpretable">Uninterpretable</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" placeholder="Comment"></td>
+                                </tr>
+                                <tr>
+                                    <td>PMS2</td>
+                                    <td>
+                                        <select id="msi-pms2" onchange="updateMSIInterpretation()">
+                                            <option value="">Select</option>
+                                            <option value="lost">Lost</option>
+                                            <option value="retained">Retained</option>
+                                            <option value="uninterpretable">Uninterpretable</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" placeholder="Comment"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>MSI Interpretation</label>
+                        <input type="text" id="msi-interpretation" readonly placeholder="Auto-calculated based on markers">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Impression Tab -->
+            <div id="impression-tab" class="tab-content">
+                <div class="section">
+                    <h2 class="section-title">Diagnostic Impression</h2>
+                    
+                    <button class="btn btn-add" onclick="addImpressionSite()">+ Add Site</button>
+                    
+                    <div id="impression-sites-container">
+                        <!-- Dynamically added impression sites -->
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Comments</h2>
+                    <textarea id="impression-comments" style="width: 100%; min-height: 150px;" placeholder="Enter additional comments..."></textarea>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">Signature Section</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Resident Pathologist</label>
+                            <input type="text" id="resident-pathologist-name" placeholder="Name">
+                            <input type="date" id="resident-pathologist-date" style="margin-top: 10px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Consulting Pathologist</label>
+                            <input type="text" id="consulting-pathologist-name" placeholder="Name">
+                            <input type="date" id="consulting-pathologist-date" style="margin-top: 10px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="actions-bar">
+            <div>
+                <span>Report Status: </span>
+                <span class="badge" id="report-status">Draft</span>
+            </div>
+            <div>
+                <button class="btn btn-secondary" onclick="saveDraft()">Save Draft</button>
+                <button class="btn btn-secondary" onclick="validateReport()">Validate</button>
+                <button class="btn btn-primary" onclick="generateReport()">Generate Report</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structures to store form data
+        let reportData = {};
+
+        function initializeReportData() {
+            reportData = {
+                specimen: {
+                    primarySpecimen: {
+                        type: '',
+                        comprising: [],
+                        dimensions: {},
+                        comments: ''
+                    },
+                    regionalNodes: [],
+                    nonRegionalNodes: [],
+                    otherSpecimens: []
+                },
+                grossFindings: {
+                    assessment: {
+                        oriented: '',
+                        integrity: '',
+                        tme: ''
+                    },
+                    tumorIdentified: '',
+                    tumorCount: '',
+                    focality: '',
+                    numberOfTumors: 2,
+                    tumors: []
+                },
+                margins: {
+                    notAssessable: false,
+                    marginList: []
+                },
+                lymphNodes: {
+                    regional: [],
+                    nonRegional: []
+                },
+                histology: {
+                    primarySpecimen: '',
+                    tumorIdentified: '',
+                    count: '',
+                    numberOfHistologies: 2,
+                    morphology: '',
+                    nonNeoplasticDescription: '',
+                    histologyDetails: [],
+                    otherFindings: {
+                        regressionGrade: '',
+                        necrosis: '',
+                        tils: '',
+                        budding: '',
+                        pni: {
+                            status: '',
+                            details: []
+                        },
+                        vascularEmboli: {
+                            status: '',
+                            details: []
+                        },
+                        lymphaticEmboli: {
+                            status: '',
+                            details: []
+                        },
+                        additionalFindings: ''
+                    },
+                    immunohistochemistry: {
+                        generalMarkers: [],
+                        msi: {
+                            msh2: { result: '', comment: '' },
+                            msh6: { result: '', comment: '' },
+                            mlh1: { result: '', comment: '' },
+                            pms2: { result: '', comment: '' },
+                            interpretation: ''
+                        }
+                    }
+                },
+                impression: {
+                    sites: [],
+                    comments: ''
+                },
+                signatures: {
+                    resident: { name: '', date: '' },
+                    consultant: { name: '', date: '' }
+                },
+                grossedBy: ''
+            };
+        }
+        
+        initializeReportData();
+
+
+        // Specimen comprising options based on specimen type
+        const comprisingOptions = {
+            'intersphincteric': ['Terminal ileum', 'Ileocaecal junction', 'Caecum', 'Rectum', 'Anal canal'],
+            'extra-levator': ['Terminal ileum', 'Ileocaecal junction', 'Caecum', 'Rectum', 'Anal canal', 'Anal skin'],
+            'abdominoperineal': ['Terminal ileum', 'Ileocaecal junction', 'Caecum', 'Rectum', 'Anal canal'],
+            'anterior': ['Sigmoid colon', 'Rectosigmoid junction', 'Rectum'],
+            'low-anterior': ['Sigmoid colon', 'Rectosigmoid junction', 'Rectum'],
+            'ultra-low': ['Sigmoid colon', 'Rectosigmoid junction', 'Rectum', 'Anorectal junction'],
+            'total-procto': ['Terminal ileum', 'Ileocaecal junction', 'Caecum', 'Appendix', 'Ascending colon', 'Hepatic flexure', 'Transverse colon', 'Splenic flexure', 'Descending colon', 'Sigmoid colon', 'Rectosigmoid junction', 'Rectum', 'Anal canal'],
+            'total-colectomy': ['Terminal ileum', 'Ileocaecal junction', 'Caecum', 'Appendix', 'Ascending colon', 'Hepatic flexure', 'Transverse colon', 'Splenic flexure', 'Descending colon', 'Sigmoid colon'],
+            'right-hemi': ['Terminal ileum', 'Ileocaecal junction', 'Caecum', 'Appendix', 'Ascending colon', 'Hepatic flexure'],
+            'left-hemi': ['Splenic flexure', 'Descending colon', 'Sigmoid colon'],
+            'extended-right': ['Terminal ileum', 'Ileocaecal junction', 'Caecum', 'Appendix', 'Ascending colon', 'Hepatic flexure', 'Transverse colon'],
+            'extended-left': ['Transverse colon', 'Splenic flexure', 'Descending colon', 'Sigmoid colon', 'Rectosigmoid junction'],
+            'transverse': ['Hepatic flexure', 'Transverse colon', 'Splenic flexure'],
+            'sigmoid': ['Sigmoid colon'],
+            'rectosigmoid': ['Sigmoid colon', 'Rectosigmoid junction', 'Rectum'],
+            'colectomy-nos': ['Terminal ileum', 'Ileocaecal junction', 'Caecum', 'Appendix', 'Ascending colon', 'Hepatic flexure', 'Transverse colon', 'Splenic flexure', 'Descending colon', 'Sigmoid colon', 'Rectosigmoid junction', 'Rectum'],
+            'polypectomy': ['Polyp']
+        };
+
+        // Tab switching
+        function switchTab(event, tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Update comprising options based on specimen type
+        function updateComprisingOptions() {
+            const specimenType = document.getElementById('specimen-type').value;
+            const comprisingDiv = document.getElementById('comprising-options');
+            const dimensionFieldsDiv = document.getElementById('dimension-fields');
+            
+            comprisingDiv.innerHTML = '';
+            dimensionFieldsDiv.innerHTML = '';
+            
+            // Clear old data
+            reportData.specimen.primarySpecimen.comprising = [];
+            
+            if (specimenType && comprisingOptions[specimenType]) {
+                reportData.specimen.primarySpecimen.type = specimenType;
+                
+                comprisingOptions[specimenType].forEach(option => {
+                    const checkboxItem = document.createElement('label');
+                    checkboxItem.className = 'checkbox-item';
+                    checkboxItem.innerHTML = `
+                        <input type="checkbox" value="${option}" onchange="updateDimensionFields()">
+                        ${option}
+                    `;
+                    comprisingDiv.appendChild(checkboxItem);
+                });
+            }
+        }
+
+        // Update dimension fields based on selected comprising options
+        function updateDimensionFields() {
+            const dimensionFieldsDiv = document.getElementById('dimension-fields');
+            const checkedOptions = document.querySelectorAll('#comprising-options input:checked');
+            
+            dimensionFieldsDiv.innerHTML = '<label>Dimensions for Selected Components</label>';
+            
+            reportData.specimen.primarySpecimen.comprising = [];
+            
+            checkedOptions.forEach(option => {
+                reportData.specimen.primarySpecimen.comprising.push(option.value);
+                
+                const fieldDiv = document.createElement('div');
+                fieldDiv.className = 'dimension-input';
+                fieldDiv.style.marginBottom = '10px';
+                fieldDiv.innerHTML = `
+                    <span style="min-width: 150px;">${option.value}:</span>
+                    <input type="number" step="0.1" placeholder="Length" data-dimension-part="length" data-structure="${option.value}">
+                    <span>x</span>
+                    <input type="number" step="0.1" placeholder="Width" data-dimension-part="width" data-structure="${option.value}">
+                    <span>x</span>
+                    <input type="number" step="0.1" placeholder="Height" data-dimension-part="height" data-structure="${option.value}">
+                    <span>cm</span>
+                `;
+                dimensionFieldsDiv.appendChild(fieldDiv);
+            });
+        }
+
+        // Update tumor details visibility
+        function updateTumorDetails() {
+            const tumorIdentified = document.getElementById('tumor-identified').value;
+            const tumorCount = document.getElementById('tumor-count');
+            
+            if (tumorIdentified === 'yes') {
+                tumorCount.parentElement.style.display = 'block';
+            } else {
+                tumorCount.parentElement.style.display = 'none';
+                document.getElementById('tumor-details-container').innerHTML = '';
+                document.getElementById('tumor-count').value = '';
+                document.getElementById('tumor-number-field').style.display = 'none';
+                document.getElementById('tumor-focality-field').style.display = 'none';
+            }
+        }
+
+        // Generate tumor forms based on count
+        function generateTumorForms() {
+            const tumorCount = document.getElementById('tumor-count').value;
+            const tumorNumberField = document.getElementById('tumor-number-field');
+            const tumorFocalityField = document.getElementById('tumor-focality-field');
+            const container = document.getElementById('tumor-details-container');
+            
+            container.innerHTML = '';
+            
+            if (tumorCount === 'single') {
+                tumorNumberField.style.display = 'none';
+                tumorFocalityField.style.display = 'block';
+                createTumorForm(1);
+            } else if (tumorCount === 'multiple') {
+                tumorNumberField.style.display = 'block';
+                tumorFocalityField.style.display = 'none';
+                const numberOfTumors = parseInt(document.getElementById('tumor-number').value) || 2;
+                for (let i = 1; i <= numberOfTumors; i++) {
+                    createTumorForm(i);
+                }
+            } else {
+                 tumorNumberField.style.display = 'none';
+                 tumorFocalityField.style.display = 'none';
+            }
+        }
+
+        // Create individual tumor form for gross findings
+        function createTumorForm(tumorNumber) {
+            const container = document.getElementById('tumor-details-container');
+            const tumorDiv = document.createElement('div');
+            tumorDiv.className = 'section';
+            
+            // Get comprising options
+            collectFormData(); // Ensure reportData is up-to-date
+            const comprisingStructures = reportData.specimen.primarySpecimen.comprising || [];
+            
+            tumorDiv.innerHTML = `
+                <div class="row-header">
+                    <h3>Tumor ${tumorNumber} Details</h3>
+                    <span class="tumor-badge">Tumor #${tumorNumber}</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>Is Epicentre? (Select epicentre location)</label>
+                    <select class="epicentre-select" id="epicentre-${tumorNumber}">
+                        <option value="">Select Epicentre</option>
+                        ${comprisingStructures.map(structure => 
+                            `<option value="${structure}">${structure}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Structures Involved by Tumor</label>
+                    <div id="structures-${tumorNumber}">
+                        ${comprisingStructures.map(structure => `
+                            <div class="structure-item" id="structure-${tumorNumber}-${structure.replace(/\s/g, '-')}">
+                                <label>${structure}</label>
+                                <select onchange="updateStructureSection(${tumorNumber}, '${structure}', this)">
+                                    <option value="">Select</option>
+                                    <option value="involved">Involved by tumor</option>
+                                    <option value="not-involved">Not involved by tumor</option>
+                                    <option value="uncertain">Uncertain</option>
+                                </select>
+                                <input type="text" placeholder="Section numbers" style="margin-top: 5px;">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tumor/Lesion Gross Appearance</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="polypoid">Polypoid</option>
+                            <option value="fungating">Fungating</option>
+                            <option value="ulcerated">Ulcerated</option>
+                            <option value="ulceroinfiltrative">Ulceroinfiltrative</option>
+                            <option value="infiltrative">Infiltrative</option>
+                            <option value="pedunculated">Pedunculated</option>
+                            <option value="sessile">Sessile</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tumor Size (cm)</label>
+                        <div class="dimension-input">
+                            <input type="number" step="0.1" placeholder="Length">
+                            <span>x</span>
+                            <input type="number" step="0.1" placeholder="Width">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tumor Site Perforation</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="absent">Absent</option>
+                            <option value="present">Present</option>
+                            <option value="uncertain">Uncertain</option>
+                        </select>
+                        <input type="text" placeholder="Section number" style="margin-top: 10px;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Necrosis</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                            <option value="uncertain">Uncertain</option>
+                        </select>
+                        <input type="text" placeholder="Section number" style="margin-top: 10px;">
+                    </div>
+                </div>
+            `;
+            container.appendChild(tumorDiv);
+        }
+
+        // Update structure highlighting when epicentre is selected
+        function updateStructureSection(tumorNumber, structure, selectElement) {
+            const epicentreSelect = document.getElementById(`epicentre-${tumorNumber}`);
+            const structureId = `structure-${tumorNumber}-${structure.replace(/\s/g, '-')}`;
+            const structureItem = document.getElementById(structureId);
+            
+            // Update epicentre highlighting
+            if (epicentreSelect.value === structure) {
+                structureItem.classList.add('epicentre');
+            }
+        }
+
+        // Histology functions
+        function updateHistologyFields() {
+            const tumorIdentified = document.getElementById('histology-tumor-identified').value;
+            const nonNeoplasticDiv = document.getElementById('non-neoplastic-description');
+            const histologyCount = document.getElementById('histology-count').parentElement;
+            
+            if (tumorIdentified === 'no' || tumorIdentified === 'no-residual') {
+                nonNeoplasticDiv.style.display = 'block';
+                histologyCount.style.display = 'none';
+                document.getElementById('histology-details-container').innerHTML = '';
+            } else if (tumorIdentified === 'yes' || tumorIdentified === 'residual-viable') {
+                nonNeoplasticDiv.style.display = 'none';
+                histologyCount.style.display = 'block';
+            } else {
+                nonNeoplasticDiv.style.display = 'none';
+                histologyCount.style.display = 'none';
+            }
+        }
+
+        function generateHistologyForms() {
+            const histologyCount = document.getElementById('histology-count').value;
+            const numberField = document.getElementById('histology-number-field');
+            const container = document.getElementById('histology-details-container');
+            
+            container.innerHTML = '';
+            
+            if (histologyCount === 'single') {
+                numberField.style.display = 'none';
+                createHistologyForm(1);
+            } else if (histologyCount === 'multiple') {
+                numberField.style.display = 'block';
+                const numberOfHistologies = parseInt(document.getElementById('histology-number').value) || 2;
+                for (let i = 1; i <= numberOfHistologies; i++) {
+                    createHistologyForm(i);
+                }
+            }
+        }
+
+        function createHistologyForm(histologyNumber) {
+            const container = document.getElementById('histology-details-container');
+            const histDiv = document.createElement('div');
+            histDiv.className = 'section';
+            
+            // Get epicentres from gross findings
+            collectFormData();
+            const grossTumors = reportData.grossFindings.tumors || [];
+            let epicentreOptions = '<option value="">Select Epicentre</option>';
+            grossTumors.forEach((tumor, index) => {
+                if (tumor.epicentre) {
+                    epicentreOptions += `<option value="epicentre-${index+1}">Epicentre ${index+1} - ${tumor.epicentre}</option>`;
+                }
+            });
+            
+            // Get comprising structures
+            const comprisingStructures = reportData.specimen.primarySpecimen.comprising || [];
+            
+            histDiv.innerHTML = `
+                <div class="row-header">
+                    <h3>Histology ${histologyNumber} Details</h3>
+                    <span class="tumor-badge">Histology #${histologyNumber}</span>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tumor Location (Epicenter)</label>
+                        <select multiple size="3">
+                            ${epicentreOptions}
+                        </select>
+                        <p class="help-text">Select multiple epicentres if applicable</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Primary or Metastatic</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="primary">Primary</option>
+                            <option value="metastatic">Metastatic</option>
+                            <option value="cannot-ascertain">Cannot ascertain</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tumor Extent</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="unifocal">Unifocal</option>
+                            <option value="multifocal">Multifocal</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Involvement of Other Structures</label>
+                    <div class="checkbox-group">
+                        ${comprisingStructures.map(structure => 
+                            `<label class="checkbox-item">
+                                <input type="checkbox" value="${structure}">
+                                ${structure}
+                            </label>`
+                        ).join('')}
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tumor Type</label>
+                    <select onchange="updateTumorTypeFields(this, ${histologyNumber})">
+                        <option value="">Select</option>
+                        <option value="epithelial">Epithelial tumors</option>
+                        <option value="neuroendocrine">Neuroendocrine tumor</option>
+                        <option value="gist">GIST</option>
+                        <option value="sarcoma">Sarcoma</option>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+                
+                <div id="tumor-type-details-${histologyNumber}">
+                    <!-- Dynamically populated based on tumor type -->
+                </div>
+            `;
+            
+            container.appendChild(histDiv);
+        }
+
+        function updateTumorTypeFields(selectElement, histologyNumber) {
+            const tumorType = selectElement.value;
+            const detailsDiv = document.getElementById(`tumor-type-details-${histologyNumber}`);
+            
+            detailsDiv.innerHTML = '';
+            if (tumorType === 'epithelial') {
+                detailsDiv.innerHTML = getEpithelialTumorFields(histologyNumber);
+            } else if (tumorType === 'neuroendocrine') {
+                detailsDiv.innerHTML = getNeuroendocrineTumorFields(histologyNumber);
+            } else if (tumorType === 'gist') {
+                detailsDiv.innerHTML = getGISTFields(histologyNumber);
+            } else if (tumorType === 'sarcoma') {
+                detailsDiv.innerHTML = getSarcomaFields(histologyNumber);
+            } else if (tumorType === 'others') {
+                detailsDiv.innerHTML = getOtherTumorFields(histologyNumber);
+            }
+        }
+
+        function getEpithelialTumorFields(histologyNumber) {
+            return `
+                <div class="form-group">
+                    <label>Histological Description</label>
+                    <textarea placeholder="Enter description"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Histological Type</label>
+                        <select multiple size="4" id="epithelial-type-${histologyNumber}" onchange="updateProportionFields(${histologyNumber})">
+                            <option value="adenocarcinoma">Adenocarcinoma</option>
+                            <option value="adenocarcinoma-signet">Adenocarcinoma with Signet ring cells</option>
+                            <option value="signet-ring">Signet ring cell adenocarcinoma</option>
+                            <option value="mucinous">Mucinous Adenocarcinoma</option>
+                            <option value="squamous">Squamous carcinoma</option>
+                            <option value="adenosquamous">Adenosquamous carcinoma</option>
+                        </select>
+                        <p class="help-text">Select multiple if mixed histology</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tumor Grade</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="cannot-assess">Cannot Assess</option>
+                            <option value="well">Well differentiated</option>
+                            <option value="moderate">Moderately differentiated</option>
+                            <option value="poor">Poorly differentiated</option>
+                            <option value="undifferentiated">Undifferentiated</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="proportion-fields-${histologyNumber}">
+                    <!-- Populated when multiple histological types selected -->
+                </div>
+                
+                <div class="form-group">
+                    <label>Maximum Depth of Invasion</label>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="mucosa">Mucosa (pT1a)</option>
+                        <option value="submucosa">Submucosa (pT1b)</option>
+                        <option value="muscularis">Muscularis Propria (pT2)</option>
+                        <option value="subserosa">Subserosa (pT3)</option>
+                        <option value="adventitia">Adventitia (pT3)</option>
+                        <option value="serosa">Serosa (pT4a)</option>
+                        <option value="adjacent">Adjacent organ (pT4b)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Histological Features Suggestive of MSI-H</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="absent">Absent
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="mucinous-carcinoma">Mucinous carcinoma
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="mucinous-diff">Mucinous differentiation >10%
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="signet-ring">Signet ring cell carcinoma
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="undifferentiated">Undifferentiated carcinoma
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="medullary">Medullary type carcinoma
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="cribriforming">Cribriforming pattern
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="heterogenous">Heterogenous (Mixed) histology
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="crohns-like">Crohn's like lymphocyte reaction
+                        </label>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getNeuroendocrineTumorFields(histologyNumber) {
+            return `
+                <div class="form-group">
+                    <label>Histological Description</label>
+                    <textarea placeholder="Enter description"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Histological Type</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="well-differentiated">Well differentiated neuroendocrine tumor (carcinoid)</option>
+                            <option value="poorly-differentiated">Poorly differentiated neuroendocrine carcinoma</option>
+                            <option value="small-cell">Small cell carcinoma</option>
+                            <option value="large-cell">Large cell neuroendocrine carcinoma</option>
+                            <option value="mixed">Mixed adenoneuroendocrine carcinoma</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Mitoses/2mm²</label>
+                        <input type="number" placeholder="Enter count">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>MIB1 (%)</label>
+                        <input type="number" placeholder="Enter percentage">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>WHO Tumor Grade</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="cannot-assess">Cannot Assess</option>
+                            <option value="grade1">Grade I</option>
+                            <option value="grade2">Grade II</option>
+                            <option value="grade3">Grade III</option>
+                        </select>
+                        <p class="help-text">Grade I: <2 mitoses/10hpf and MIB1 ≤2%<br>
+                        Grade II: 2-20 mitoses/10hpf or MIB1 3-20%<br>
+                        Grade III: >20 mitoses/10hpf or MIB1 >20%</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Necrosis</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="cannot-assess">Cannot assess</option>
+                            <option value="absent">Absent</option>
+                            <option value="present">Present</option>
+                            <option value="focal">Focal</option>
+                            <option value="extensive">Extensive</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getGISTFields(histologyNumber) {
+            return `
+                <div class="form-group">
+                    <label>Histological Description</label>
+                    <textarea placeholder="Enter description"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Histological Type</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="spindle">Gastrointestinal stromal tumor, spindle cell type</option>
+                            <option value="epithelioid">Gastrointestinal stromal tumor, epithelioid type</option>
+                            <option value="mixed">Gastrointestinal stromal tumor, mixed type</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Mitoses (per 5mm² area)</label>
+                        <input type="number" placeholder="Enter count">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tumor Grade</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="cannot-assess">Cannot assess</option>
+                            <option value="low">Low grade</option>
+                            <option value="high">High grade</option>
+                        </select>
+                        <p class="help-text">Low grade: mitoses ≤5, High grade: mitoses >5</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Risk of Progression</label>
+                        <select>
+                            <option value="">Select</option>
+                            <option value="none">None</option>
+                            <option value="very-low">Very low</option>
+                            <option value="low">Low</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="high">High</option>
+                            <option value="overtly-malignant">Overtly malignant</option>
+                            <option value="overtly-metastatic">Overtly metastatic</option>
+                            <option value="cannot-determine">Cannot be determined</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getSarcomaFields(histologyNumber) {
+            return `
+                <div class="form-group">
+                    <label>Histological Description</label>
+                    <textarea placeholder="Enter description"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Histological Diagnosis</label>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="leiomyosarcoma">Leiomyosarcoma</option>
+                        <option value="other">Other (specify)</option>
+                    </select>
+                </div>
+                
+                <h4>FNCLC Grading</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tumor Differentiation</label>
+                        <select id="fnclc-diff-${histologyNumber}" onchange="calculateFNCLCGrade(${histologyNumber})">
+                            <option value="">Select</option>
+                            <option value="1">1 - Resembles normal adult mesenchymal tissue</option>
+                            <option value="2">2 - Histologic typing is certain</option>
+                            <option value="3">3 - Synovial sarcoma, osteosarcoma, Ewing's, etc.</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Mitotic Count per 10hpf</label>
+                        <select id="fnclc-mitotic-${histologyNumber}" onchange="calculateFNCLCGrade(${histologyNumber})">
+                            <option value="">Select</option>
+                            <option value="1">1 - (0-9 mitoses)</option>
+                            <option value="2">2 - (10-19 mitoses)</option>
+                            <option value="3">3 - (≥20 mitoses)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tumor Necrosis</label>
+                        <select id="fnclc-necrosis-${histologyNumber}" onchange="calculateFNCLCGrade(${histologyNumber})">
+                            <option value="">Select</option>
+                            <option value="0">0 - No necrosis</option>
+                            <option value="1">1 - <50% necrosis</option>
+                            <option value="2">2 - ≥50% necrosis</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Total Score</label>
+                        <input type="text" id="fnclc-total-${histologyNumber}" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tumor Grade</label>
+                        <input type="text" id="fnclc-grade-${histologyNumber}" readonly>
+                        <p class="help-text">Grade 1: 2-3 points<br>Grade 2: 4-5 points<br>Grade 3: 6-8 points</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getOtherTumorFields(histologyNumber) {
+            return `
+                <div class="form-group">
+                    <label>Histological Description</label>
+                    <textarea placeholder="Enter description"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Histological Diagnosis</label>
+                    <input type="text" placeholder="Enter diagnosis">
+                </div>
+            `;
+        }
+
+        function updateProportionFields(histologyNumber) {
+            const select = document.getElementById(`epithelial-type-${histologyNumber}`);
+            const proportionDiv = document.getElementById(`proportion-fields-${histologyNumber}`);
+            const selectedOptions = Array.from(select.selectedOptions);
+            
+            if (selectedOptions.length > 1) {
+                proportionDiv.innerHTML = '<label>Proportion of Each Component (%)</label>';
+                selectedOptions.forEach(option => {
+                    const fieldDiv = document.createElement('div');
+                    fieldDiv.style.marginBottom = '10px';
+                    fieldDiv.innerHTML = `
+                        <span style="display: inline-block; min-width: 250px;">${option.text}:</span>
+                        <input type="number" min="0" max="100" placeholder="%" style="width: 100px;">
+                    `;
+                    proportionDiv.appendChild(fieldDiv);
+                });
+                
+                const totalDiv = document.createElement('div');
+                totalDiv.style.marginTop = '10px';
+                totalDiv.innerHTML = '<strong>Total must equal 100%</strong>';
+                proportionDiv.appendChild(totalDiv);
+            } else {
+                proportionDiv.innerHTML = '';
+            }
+        }
+
+        function calculateFNCLCGrade(histologyNumber) {
+            const diff = parseInt(document.getElementById(`fnclc-diff-${histologyNumber}`).value) || 0;
+            const mitotic = parseInt(document.getElementById(`fnclc-mitotic-${histologyNumber}`).value) || 0;
+            const necrosis = parseInt(document.getElementById(`fnclc-necrosis-${histologyNumber}`).value) || 0;
+            
+            const total = diff + mitotic + necrosis;
+            const totalField = document.getElementById(`fnclc-total-${histologyNumber}`);
+            const gradeField = document.getElementById(`fnclc-grade-${histologyNumber}`);
+            
+            if (total > 0) {
+                totalField.value = total;
+                
+                if (total <= 3) {
+                    gradeField.value = 'Grade 1';
+                } else if (total <= 5) {
+                    gradeField.value = 'Grade 2';
+                } else {
+                    gradeField.value = 'Grade 3';
+                }
+            } else {
+                totalField.value = '';
+                gradeField.value = '';
+            }
+        }
+
+        function updateInvasionDetails(type) {
+            const select = document.getElementById(`${type}-${type === 'perineural' ? 'invasion' : 'emboli'}`);
+            const details = document.getElementById(`${type}-details`);
+            
+            if (select.value.includes('present')) {
+                details.style.display = 'block';
+            } else {
+                details.style.display = 'none';
+            }
+        }
+
+        function updateMSIInterpretation() {
+            const msh2 = document.getElementById('msi-msh2').value;
+            const msh6 = document.getElementById('msi-msh6').value;
+            const mlh1 = document.getElementById('msi-mlh1').value;
+            const pms2 = document.getElementById('msi-pms2').value;
+            
+            const interpretationField = document.getElementById('msi-interpretation');
+            let lostCount = 0;
+            let uninterpretableCount = 0;
+            
+            [msh2, msh6, mlh1, pms2].forEach(value => {
+                if (value === 'lost') lostCount++;
+                if (value === 'uninterpretable') uninterpretableCount++;
+            });
+            
+            if (uninterpretableCount > 0 && lostCount === 0) {
+                interpretationField.value = 'Uninterpretable';
+            } else if (lostCount >= 1) {
+                interpretationField.value = 'Microsatellite instability-high (MSI-H)';
+            } else if ([msh2, msh6, mlh1, pms2].every(v => v === 'retained')) {
+                interpretationField.value = 'Microsatellite stable (MSI-L/MSS)';
+            } else {
+                interpretationField.value = '';
+            }
+        }
+
+        // Add dynamic element functions
+        function addRegionalNode() {
+            const list = document.getElementById('regional-nodes-list');
+            const nodeDiv = document.createElement('div');
+            nodeDiv.className = 'dynamic-row';
+            nodeDiv.innerHTML = `
+                <div class="row-header">
+                    <span>Regional Node</span>
+                    <button class="btn btn-remove" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Node Type</label>
+                        <input type="text" placeholder="Enter node type">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" placeholder="Enter location">
+                    </div>
+                </div>
+            `;
+            list.appendChild(nodeDiv);
+        }
+
+        function addNonRegionalNode() {
+            const list = document.getElementById('non-regional-nodes-list');
+            const nodeDiv = document.createElement('div');
+            nodeDiv.className = 'dynamic-row';
+            nodeDiv.innerHTML = `
+                <div class="row-header">
+                    <span>Non-Regional Node</span>
+                    <button class="btn btn-remove" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Node Type</label>
+                        <input type="text" placeholder="Enter node type">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" placeholder="Enter location">
+                    </div>
+                </div>
+            `;
+            list.appendChild(nodeDiv);
+        }
+
+        function addOtherSpecimen() {
+            const list = document.getElementById('other-specimens-list');
+            const specimenDiv = document.createElement('div');
+            specimenDiv.className = 'dynamic-row';
+            specimenDiv.innerHTML = `
+                <div class="row-header">
+                    <span>Other Specimen</span>
+                    <button class="btn btn-remove" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Specimen Type</label>
+                        <input type="text" placeholder="Enter specimen type">
+                    </div>
+                    <div class="form-group">
+                        <label>Site</label>
+                        <input type="text" placeholder="Enter site">
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label>Comments</label>
+                    <textarea placeholder="Enter comments"></textarea>
+                </div>
+            `;
+            list.appendChild(specimenDiv);
+        }
+
+        function addMargin() {
+            const tbody = document.querySelector('#margins-table tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" placeholder="Margin name"></td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="involved">Involved</option>
+                        <option value="free">Free</option>
+                        <option value="not-assessable">Not Assessable</option>
+                    </select>
+                </td>
+                <td><input type="number" step="0.1" placeholder="Distance"></td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="radial">Radial</option>
+                        <option value="shaved">Shaved</option>
+                    </select>
+                </td>
+                <td><input type="text" placeholder="Comments"></td>
+                <td><input type="text" placeholder="Section"></td>
+                <td><button class="btn btn-remove" onclick="removeMargin(this)">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function removeMargin(button) {
+            button.closest('tr').remove();
+        }
+
+        function toggleMarginsTable() {
+            const checkbox = document.getElementById('margins-not-assessable');
+            const tableContainer = document.getElementById('margins-table-container');
+            
+            if (checkbox.checked) {
+                tableContainer.style.opacity = '0.5';
+                tableContainer.style.pointerEvents = 'none';
+            } else {
+                tableContainer.style.opacity = '1';
+                tableContainer.style.pointerEvents = 'auto';
+            }
+        }
+
+        function addRegionalLymphNodeSpecimen() {
+            const container = document.getElementById('regional-lymph-nodes-container');
+            const specimenDiv = document.createElement('div');
+            const specimenNumber = container.children.length + 1;
+            
+            specimenDiv.className = 'dynamic-row';
+            specimenDiv.innerHTML = `
+                <div class="row-header">
+                    <h3>Regional Lymph Node Specimen ${specimenNumber}</h3>
+                    <button class="btn btn-remove" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                </div>
+                
+                <h4>Nodes</h4>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Level of Node</th>
+                                <th>No. of Nodes</th>
+                                <th>Size of Largest Node (cm)</th>
+                                <th>Gross Involvement</th>
+                                <th>Extranodal Extension</th>
+                                <th>Largest Dimension of Metastases (cm)</th>
+                                <th>Soft Tissue Deposit</th>
+                                <th>Comment</th>
+                                <th>Section No</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" placeholder="Node level"></td>
+                                <td><input type="number" placeholder="Number"></td>
+                                <td><input type="number" step="0.1" placeholder="Size"></td>
+                                <td>
+                                    <select>
+                                        <option value="">Select</option>
+                                        <option value="present">Present</option>
+                                        <option value="absent">Absent</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select>
+                                        <option value="">Select</option>
+                                        <option value="present">Present</option>
+                                        <option value="absent">Absent</option>
+                                    </select>
+                                </td>
+                                <td><input type="number" step="0.1" placeholder="Size"></td>
+                                <td>
+                                    <select>
+                                        <option value="">Select</option>
+                                        <option value="present">Present</option>
+                                        <option value="absent">Absent</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" placeholder="Comments"></td>
+                                <td><input type="text" placeholder="Section"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            container.appendChild(specimenDiv);
+        }
+
+        function addNonRegionalLymphNode() {
+            const tbody = document.querySelector('#non-regional-nodes-table tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" placeholder="Node level"></td>
+                <td><input type="number" placeholder="Number"></td>
+                <td><input type="number" step="0.1" placeholder="Size"></td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                    </select>
+                </td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                    </select>
+                </td>
+                <td><input type="number" step="0.1" placeholder="Size"></td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                    </select>
+                </td>
+                <td><input type="text" placeholder="Comments"></td>
+                <td><input type="text" placeholder="Section"></td>
+                <td><button class="btn btn-remove" onclick="this.closest('tr').remove()">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function addIHCMarker() {
+            const tbody = document.querySelector('#ihc-markers-table tbody');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="text" placeholder="Marker name"></td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="non-contributory">Non contributory</option>
+                        <option value="uninterpretable">Uninterpretable</option>
+                        <option value="negative">Negative</option>
+                        <option value="equivocal">Equivocal</option>
+                        <option value="positive">Positive</option>
+                    </select>
+                </td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <select style="flex: 1;">
+                            <option value="">Select</option>
+                            <option value="focal">Focal</option>
+                            <option value="diffuse">Diffuse</option>
+                        </select>
+                        <input type="number" placeholder="%" style="width: 70px;">
+                    </div>
+                </td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="weak">Weak</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="strong">Strong</option>
+                    </select>
+                </td>
+                <td>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="cytoplasmic">Cytoplasmic</option>
+                        <option value="membranous">Membranous</option>
+                        <option value="nuclear">Nuclear</option>
+                    </select>
+                </td>
+                <td><input type="text" placeholder="Comment"></td>
+                <td><button class="btn btn-remove" onclick="this.closest('tr').remove()">Remove</button></td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function addImpressionSite() {
+            const container = document.getElementById('impression-sites-container');
+            const siteNumber = container.children.length + 1;
+            
+            const siteDiv = document.createElement('div');
+            siteDiv.className = 'dynamic-row';
+            siteDiv.innerHTML = `
+                <div class="row-header">
+                    <h3>Site ${siteNumber}</h3>
+                    <button class="btn btn-remove" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Site</label>
+                        <input type="text" placeholder="Enter site">
+                    </div>
+                    <div class="form-group">
+                        <label>Specimen Type</label>
+                        <input type="text" placeholder="Enter specimen type">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Diagnoses</label>
+                    <button class="btn btn-add" onclick="addDiagnosis(this)">+ Add Diagnosis</button>
+                    <div class="diagnosis-list" style="margin-top: 10px;">
+                        <div class="diagnosis-item" style="display:flex; gap: 5px; margin-bottom: 10px;">
+                            <input type="text" placeholder="Prefix" style="flex:1;">
+                            <input type="text" placeholder="Diagnosis" style="flex:2;">
+                            <input type="text" placeholder="Grade" style="flex:1;">
+                            <input type="text" placeholder="Suffix" style="flex:1;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>AJCC TNM Edition</label>
+                        <input type="number" placeholder="Edition number">
+                    </div>
+                    <div class="form-group">
+                        <label>pT</label>
+                        <input type="text" placeholder="pT">
+                    </div>
+                    <div class="form-group">
+                        <label>pN</label>
+                        <input type="text" placeholder="pN">
+                    </div>
+                    <div class="form-group">
+                        <label>pM</label>
+                        <input type="text" placeholder="pM">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Resection Extent</label>
+                    <select>
+                        <option value="">Select</option>
+                        <option value="R0">R0</option>
+                        <option value="R1">R1</option>
+                        <option value="R2">R2</option>
+                        <option value="RX">RX</option>
+                    </select>
+                </div>
+            `;
+            container.appendChild(siteDiv);
+        }
+
+        function addDiagnosis(button) {
+            const diagnosisList = button.nextElementSibling;
+            const diagnosisItem = document.createElement('div');
+            diagnosisItem.className = 'diagnosis-item';
+            diagnosisItem.style.display = 'flex';
+            diagnosisItem.style.gap = '5px';
+            diagnosisItem.style.marginBottom = '10px';
+            diagnosisItem.innerHTML = `
+                <input type="text" placeholder="Prefix" style="flex:1;">
+                <input type="text" placeholder="Diagnosis" style="flex:2;">
+                <input type="text" placeholder="Grade" style="flex:1;">
+                <input type="text" placeholder="Suffix" style="flex:1;">
+                <button class="btn btn-remove" onclick="this.parentElement.remove()">-</button>
+            `;
+            diagnosisList.appendChild(diagnosisItem);
+        }
+
+        // Save draft function
+        function saveDraft() {
+            collectFormData();
+            localStorage.setItem('crcReportDraft', JSON.stringify(reportData));
+            document.getElementById('report-status').textContent = 'Draft Saved';
+            alert('Draft saved successfully!');
+        }
+
+        // Validate report
+        function validateReport() {
+            collectFormData();
+            let errors = [];
+            
+            if (!reportData.specimen.primarySpecimen.type) {
+                errors.push('Primary specimen type is required.');
+            }
+            
+            if (!reportData.grossedBy) {
+                errors.push('"Grossed by" field is required.');
+            }
+            
+            if (reportData.grossFindings.tumorIdentified === 'yes' && (!reportData.grossFindings.tumors || reportData.grossFindings.tumors.length === 0)) {
+                 errors.push('Tumor details must be added if "Tumor Identified" is Yes.');
+            } else if (reportData.grossFindings.tumorIdentified === 'yes') {
+                 let hasEpicentre = reportData.grossFindings.tumors.some(t => t.epicentre);
+                 if (!hasEpicentre) {
+                    errors.push('At least one tumor must have an epicentre selected.');
+                 }
+            }
+            
+            if (errors.length > 0) {
+                alert('Validation errors:\n- ' + errors.join('\n- '));
+                document.getElementById('report-status').textContent = 'Validation Failed';
+                return false;
+            } else {
+                alert('Report validation successful!');
+                document.getElementById('report-status').textContent = 'Validated';
+                return true;
+            }
+        }
+
+        // Generate report
+        function generateReport() {
+            if (!validateReport()) {
+                return;
+            }
+            
+            collectFormData();
+            
+            let report = `
+=====================================
+  CRC SYNOPTIC REPORT
+=====================================
+Date: ${new Date().toLocaleDateString()}
+
+${generateSpecimenReport()}
+${generateGrossFindingsReport()}
+${generateMarginsReport()}
+${generateLymphNodesReport()}
+${generateHistologyReport()}
+${generateImpressionReport()}
+
+-------------------------------------
+SIGNATURES
+-------------------------------------
+Grossed by: ${reportData.grossedBy || 'Not specified'}
+
+Resident: ${reportData.signatures.resident.name || ''} (${reportData.signatures.resident.date || ''})
+Consultant: ${reportData.signatures.consultant.name || ''} (${reportData.signatures.consultant.date || ''})
+=====================================
+            `;
+            
+            const blob = new Blob([report.replace(/^\s+/gm, '')], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `CRC_Report_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            document.getElementById('report-status').textContent = 'Generated';
+            alert('Report generated and downloaded!');
+        }
+        
+                // --- REPORT GENERATION HELPERS ---
+        function generateSpecimenReport() {
+            let text = 'SPECIMEN RECEIVED:\n------------------\n';
+            text += `Primary Specimen: ${reportData.specimen.primarySpecimen.type || 'Not specified'}\n`;
+            text += `Comprising of: ${reportData.specimen.primarySpecimen.comprising?.join(', ') || 'Not specified'}\n`;
+            // Add other sections like other specimens, nodes etc.
+            if(reportData.specimen.otherSpecimens.length > 0){
+                text += `Other Specimens:\n`;
+                reportData.specimen.otherSpecimens.forEach((s, i) => {
+                    text += `  - Specimen ${i+1}: ${s.type} (${s.site}) - ${s.comments}\n`;
+                });
+            }
+            return text + '\n';
+        }
+
+        function generateGrossFindingsReport() {
+            let text = 'GROSS FINDINGS:\n------------------\n';
+            text += `Specimen Oriented: ${reportData.grossFindings.assessment.oriented || 'Not specified'}\n`;
+            text += `Specimen Integrity: ${reportData.grossFindings.assessment.integrity || 'Not specified'}\n`;
+            text += `Total Mesorectal Excision: ${reportData.grossFindings.assessment.tme || 'Not assessed'}\n`;
+            text += `Tumor Identified: ${reportData.grossFindings.tumorIdentified || 'Not specified'}\n`;
+            if (reportData.grossFindings.tumors.length > 0) {
+                 reportData.grossFindings.tumors.forEach((tumor, i) => {
+                    text += `\n  TUMOR #${i+1}:\n`;
+                    text += `  - Epicentre: ${tumor.epicentre || 'Not specified'}\n`;
+                    text += `  - Gross Appearance: ${tumor.appearance || 'Not specified'}\n`;
+                    text += `  - Size: ${tumor.size.length || ''} x ${tumor.size.width || ''} cm\n`;
+                    text += `  - Perforation: ${tumor.perforation.status || 'Not specified'} (Section: ${tumor.perforation.section || 'N/A'})\n`;
+                    text += `  - Necrosis: ${tumor.necrosis.status || 'Not specified'} (Section: ${tumor.necrosis.section || 'N/A'})\n`;
+                 });
+            }
+            return text + '\n';
+        }
+        
+        function generateMarginsReport() {
+            let text = 'MARGINS:\n------------------\n';
+            if (reportData.margins.notAssessable) {
+                return text + 'Margins not assessable.\n\n';
+            }
+            if (reportData.margins.marginList.length > 0) {
+                reportData.margins.marginList.forEach(margin => {
+                    text += `- ${margin.name}: ${margin.involvement}`;
+                    if(margin.distance) text += `, Distance: ${margin.distance} cm`;
+                    if(margin.method) text += `, Method: ${margin.method}`;
+                    text += ` (Section: ${margin.section || 'N/A'})\n`;
+                });
+            } else {
+                text += 'No margin data recorded.\n';
+            }
+            return text + '\n';
+        }
+
+        function generateLymphNodesReport(){
+            let text = 'LYMPH NODES:\n------------------\n';
+            // This is a simplified example. A full implementation would iterate through collected data.
+            const regionalCount = reportData.lymphNodes.regional.length;
+            const nonRegionalCount = reportData.lymphNodes.nonRegional.length;
+            text += `Regional Lymph Node Specimens: ${regionalCount}\n`;
+            text += `Non-Regional Lymph Nodes Examined: ${nonRegionalCount}\n`;
+            return text + '\n';
+        }
+
+        function generateHistologyReport() {
+            let text = 'HISTOLOGY:\n------------------\n';
+            text += `Tumor Identified: ${reportData.histology.tumorIdentified}\n`;
+            // Add details from histology forms...
+            text += `\nOther Findings:\n`;
+            text += `- Tumor Regression Grade: ${reportData.histology.otherFindings.regressionGrade || 'N/A'}\n`;
+            text += `- Necrosis: ${reportData.histology.otherFindings.necrosis || 'N/A'}\n`;
+            text += `- Tumor Infiltrating Lymphocytes (TILs): ${reportData.histology.otherFindings.tils || 'N/A'}\n`;
+            text += `- Tumor Budding: ${reportData.histology.otherFindings.budding || 'N/A'}\n`;
+            
+            text += `\nImmunohistochemistry:\n`;
+            text += `MSI Status: ${reportData.histology.immunohistochemistry.msi.interpretation || 'Not assessed'}\n`;
+
+            return text || 'No histology data recorded.\n\n';
+        }
+
+        function generateImpressionReport() {
+            let text = 'IMPRESSION:\n------------------\n';
+            if (reportData.impression.sites.length > 0) {
+                reportData.impression.sites.forEach((site, i) => {
+                    text += `SITE ${i+1}: ${site.site} (${site.specimenType})\n`;
+                    site.diagnoses.forEach(d => {
+                        text += `  - Diagnosis: ${[d.prefix, d.diagnosis, d.grade, d.suffix].filter(Boolean).join(', ')}\n`;
+                    });
+                    text += `  - TNM: pT:${site.pT} pN:${site.pN} pM:${site.pM} (AJCC ${site.ajcc} Edition)\n`;
+                    text += `  - Resection: ${site.resection}\n\n`;
+                });
+            }
+            text += `Comments: ${reportData.impression.comments || 'None'}\n`;
+            return text + '\n';
+        }
+
+
+        // Collect all form data
+        function collectFormData() {
+            initializeReportData(); // Clear old data
+            
+            // SPECIMEN
+            reportData.specimen.primarySpecimen.type = document.getElementById('specimen-type').value;
+            reportData.specimen.primarySpecimen.comprising = Array.from(document.querySelectorAll('#comprising-options input:checked')).map(cb => cb.value);
+            document.querySelectorAll('#dimension-fields .dimension-input').forEach(dim => {
+                const structure = dim.querySelector('[data-structure]').dataset.structure;
+                reportData.specimen.primarySpecimen.dimensions[structure] = {
+                    length: dim.querySelector('[data-dimension-part="length"]').value,
+                    width: dim.querySelector('[data-dimension-part="width"]').value,
+                    height: dim.querySelector('[data-dimension-part="height"]').value,
+                };
+            });
+            reportData.specimen.primarySpecimen.comments = document.getElementById('specimen-comments').value;
+            document.querySelectorAll('#other-specimens-list .dynamic-row').forEach(row => {
+                reportData.specimen.otherSpecimens.push({
+                    type: row.querySelectorAll('input')[0].value,
+                    site: row.querySelectorAll('input')[1].value,
+                    comments: row.querySelector('textarea').value
+                });
+            });
+
+            // GROSS FINDINGS
+            reportData.grossedBy = document.getElementById('grossed-by').value;
+            reportData.grossFindings.assessment.oriented = document.querySelector('input[name="specimen-oriented"]:checked')?.value;
+            reportData.grossFindings.assessment.integrity = document.querySelector('input[name="specimen-integrity"]:checked')?.value;
+            reportData.grossFindings.assessment.tme = document.getElementById('mesorectal-excision').value;
+            reportData.grossFindings.tumorIdentified = document.getElementById('tumor-identified').value;
+            reportData.grossFindings.tumorCount = document.getElementById('tumor-count').value;
+            document.querySelectorAll('#tumor-details-container .section').forEach(tumorDiv => {
+                let tumorData = {
+                    epicentre: tumorDiv.querySelector('.epicentre-select').value,
+                    appearance: tumorDiv.querySelectorAll('select')[1].value,
+                    size: {
+                        length: tumorDiv.querySelectorAll('.dimension-input input')[0].value,
+                        width: tumorDiv.querySelectorAll('.dimension-input input')[1].value
+                    },
+                    perforation: {
+                        status: tumorDiv.querySelectorAll('select')[2].value,
+                        section: tumorDiv.querySelectorAll('input[type="text"]')[0].value
+                    },
+                    necrosis: {
+                        status: tumorDiv.querySelectorAll('select')[3].value,
+                        section: tumorDiv.querySelectorAll('input[type="text"]')[1].value
+                    }
+                };
+                reportData.grossFindings.tumors.push(tumorData);
+            });
+            
+            // MARGINS
+            reportData.margins.notAssessable = document.getElementById('margins-not-assessable').checked;
+            document.querySelectorAll('#margins-table tbody tr').forEach(row => {
+                reportData.margins.marginList.push({
+                    name: row.cells[0].querySelector('input').value,
+                    involvement: row.cells[1].querySelector('select').value,
+                    distance: row.cells[2].querySelector('input').value,
+                    method: row.cells[3].querySelector('select').value,
+                    comments: row.cells[4].querySelector('input').value,
+                    section: row.cells[5].querySelector('input').value,
+                });
+            });
+
+            // HISTOLOGY (Other Findings and MSI)
+            reportData.histology.tumorIdentified = document.getElementById('histology-tumor-identified').value;
+            reportData.histology.otherFindings.regressionGrade = document.getElementById('regression-grade').value;
+            reportData.histology.otherFindings.necrosis = document.getElementById('histology-necrosis').value;
+            reportData.histology.otherFindings.tils = document.getElementById('tils-score').value;
+            reportData.histology.otherFindings.budding = document.getElementById('tumor-budding').value;
+            reportData.histology.otherFindings.additionalFindings = document.getElementById('additional-histological-findings').value;
+            reportData.histology.immunohistochemistry.msi.msh2 = { result: document.getElementById('msi-msh2').value, comment: document.getElementById('msi-msh2').closest('tr').querySelector('input').value };
+            reportData.histology.immunohistochemistry.msi.msh6 = { result: document.getElementById('msi-msh6').value, comment: document.getElementById('msi-msh6').closest('tr').querySelector('input').value };
+            reportData.histology.immunohistochemistry.msi.mlh1 = { result: document.getElementById('msi-mlh1').value, comment: document.getElementById('msi-mlh1').closest('tr').querySelector('input').value };
+            reportData.histology.immunohistochemistry.msi.pms2 = { result: document.getElementById('msi-pms2').value, comment: document.getElementById('msi-pms2').closest('tr').querySelector('input').value };
+            reportData.histology.immunohistochemistry.msi.interpretation = document.getElementById('msi-interpretation').value;
+            
+            // IMPRESSION
+            document.querySelectorAll('#impression-sites-container .dynamic-row').forEach(siteDiv => {
+                let siteData = {
+                    site: siteDiv.querySelectorAll('input')[0].value,
+                    specimenType: siteDiv.querySelectorAll('input')[1].value,
+                    diagnoses: [],
+                    ajcc: siteDiv.querySelectorAll('input')[2].value,
+                    pT: siteDiv.querySelectorAll('input')[3].value,
+                    pN: siteDiv.querySelectorAll('input')[4].value,
+                    pM: siteDiv.querySelectorAll('input')[5].value,
+                    resection: siteDiv.querySelector('select').value
+                };
+                siteDiv.querySelectorAll('.diagnosis-item').forEach(diag => {
+                    siteData.diagnoses.push({
+                        prefix: diag.querySelectorAll('input')[0].value,
+                        diagnosis: diag.querySelectorAll('input')[1].value,
+                        grade: diag.querySelectorAll('input')[2].value,
+                        suffix: diag.querySelectorAll('input')[3].value,
+                    });
+                });
+                reportData.impression.sites.push(siteData);
+            });
+            reportData.impression.comments = document.getElementById('impression-comments').value;
+
+            // SIGNATURES
+            reportData.signatures.resident.name = document.getElementById('resident-pathologist-name').value;
+            reportData.signatures.resident.date = document.getElementById('resident-pathologist-date').value;
+            reportData.signatures.consultant.name = document.getElementById('consulting-pathologist-name').value;
+            reportData.signatures.consultant.date = document.getElementById('consulting-pathologist-date').value;
+        }
+        
+        // --- LOAD DRAFT ---
+        function loadDraft(data) {
+            // SPECIMEN
+            if (data.specimen && data.specimen.primarySpecimen) {
+                document.getElementById('specimen-type').value = data.specimen.primarySpecimen.type;
+                updateComprisingOptions();
+                data.specimen.primarySpecimen.comprising.forEach(comp => {
+                    const checkbox = document.querySelector(`#comprising-options input[value="${comp}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+                updateDimensionFields();
+            }
+
+            // GROSSED BY
+            if (data.grossedBy) {
+                document.getElementById('grossed-by').value = data.grossedBy;
+            }
+            // A realistic application would need a sophisticated loading logic here for dynamic content.
+            // For this single-file HTML, we rely on the user to regenerate dynamic sections if needed.
+            
+            // alert('Draft loaded. Note: This is a simplified load, dynamic fields are not fully restored.');
+        }
+
+        // Load draft on page load
+        window.onload = function() {
+            const savedDraft = localStorage.getItem('crcReportDraft');
+            if (savedDraft) {
+                 try {
+                    const parsedData = JSON.parse(savedDraft);
+                    if (parsedData && typeof parsedData === 'object') {
+                        loadDraft(parsedData);
+                    }
+                } catch (e) {
+                    console.error("Failed to parse saved draft:", e);
+                    localStorage.removeItem('crcReportDraft'); // Clear corrupted data
+                }
+            }
+            
+            document.addEventListener('change', function(e) {
+                if (e.target && e.target.id && e.target.id.startsWith('epicentre-')) {
+                    const tumorNumber = e.target.id.split('-')[1];
+                    const selectedStructure = e.target.value;
+                    
+                    const structures = document.querySelectorAll(`#structures-${tumorNumber} .structure-item`);
+                    structures.forEach(item => {
+                        item.classList.remove('epicentre');
+                        if (selectedStructure && item.id.includes(selectedStructure.replace(/\s/g, '-'))) {
+                            item.classList.add('epicentre');
+                        }
+                    });
+                }
+            });
+        };
+
+        // Auto-save draft every 60 seconds
+        setInterval(function() {
+            saveDraft();
+            console.log('Draft auto-saved');
+        }, 60000);
+    </script>
+</body>
+</html>
